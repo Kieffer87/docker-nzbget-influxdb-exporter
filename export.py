@@ -48,19 +48,5 @@ def write_to_influxdb():
         write_api.write(bucket=influxdb_bucket, record=p)
 
 
-def read_from_influxdb():
-    client = get_influxdb_client()
-    query_api = client.query_api()
-
-    ## using Table structure
-    tables = query_api.query(f'from(bucket:"{influxdb_bucket}") |> range(start: -10m)')
-
-    for table in tables:
-        print(table)
-        for row in table.records:
-            print(row.values)
-
-
 if __name__ == '__main__':
     write_to_influxdb()
-    read_from_influxdb()
