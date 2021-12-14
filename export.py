@@ -3,50 +3,56 @@ import requests
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-nzbget_username = os.getenv('NZBGET_USERNAME')
-nzbget_password = os.getenv('NZBGET_PASSWORD')
-nzbget_url = os.getenv('NZBGET_URL')
-nzbget_url_ssl = os.getenv('NZBGET_URL_SSL')
-nzbget_port = os.getenv('NZBGET_PORT')
-nzbget_values_to_return = os.getenv('NZBGET_VALUES_TO_RETURN').split(',')
 
-influxdb_token = os.getenv('INFLUXDB_TOKEN')
-influxdb_org = os.getenv('INFLUXDB_ORG')
-influxdb_url = os.getenv('INFLUXDB_URL')
-influxdb_url_ssl = os.getenv('INFLUXDB_URL_SSL')
-influxdb_port = os.getenv('INFLUXDB_PORT')
-influxdb_bucket = os.getenv('INFLUXDB_BUCKET')
+class NZBGet:
+    def __init__(self) -> None:
+        self.username = os.getenv('NZBGET_USERNAME')
+        self.password = os.getenv('NZBGET_PASSWORD')
+        self.url = os.getenv('NZBGET_URL')
+        self.url_ssl = os.getenv('NZBGET_URL_SSL')
+        self.port = os.getenv('NZBGET_PORT')
+        self.values_to_return = os.getenv('NZBGET_VALUES_TO_RETURN').split(',')
 
-metrics_to_export = []
-
-
-def get_nzb_status_metrics(api_endpoint):
-    nzbget_endpoint = f'{nzbget_url_ssl}://{nzbget_username}:{nzbget_password}@{nzbget_url}:' \
-                      f'{nzbget_port}/jsonrpc/{api_endpoint}'
-    r = requests.get(nzbget_endpoint)
-    result = r.json().get('result')
-    for key in [key for key in result if key not in nzbget_values_to_return]: del result[key]
-    return result
+    def get_nzb_status_metrics(self, api_endpoint):
+        nzbget_endpoint = f'{self.url_ssl}://{self.username}:{self.password}@{self.url}:' \
+                          f'{self.port}/jsonrpc/{api_endpoint}'
+        r = requests.get(nzbget_endpoint)
+        result = r.json().get('result')
+        for key in [key for key in result if key not in self.values_to_return]:
+            del result[key]
+        return result
 
 
-def get_influxdb_client():
-    return InfluxDBClient(
-        url=f'{influxdb_url_ssl}://{influxdb_url}:{influxdb_port}',
-        token=influxdb_token,
-        org=influxdb_org
-    )
+class InfluxDB:
+    def __init__(self) -> None:
+        self.token = os.getenv('INFLUXDB_TOKEN')
+        self.org = os.getenv('INFLUXDB_ORG')
+        self.url = os.getenv('INFLUXDB_URL')
+        self.url_ssl = os.getenv('INFLUXDB_URL_SSL')
+        self.port = os.getenv('INFLUXDB_PORT')
+        self.bucket = os.getenv('INFLUXDB_BUCKET')
 
+    def get_influxdb_client(self):
+        return InfluxDBClient(
+            url=f'{self.url_ssl}://{self.url}:{self.port}',
+            token=self.token,
+            org=self.org
+        )
 
-def write_to_influxdb():
-    client = get_influxdb_client()
+    def write_to_influxdb(self):
+        client = self.get_influxdb_client()
+        endpoint = 'status'
+        write_api = client.write_api(write_options=SYNCHRONOUS, precision="s")
 
-    write_api = client.write_api(write_options=SYNCHRONOUS, precision="s")
-    metrics = get_nzb_status_metrics('status')
+        metrics = NZBGet().get_nzb_status_metrics(endpoint)
 
-    for key in metrics:
-        p = Point(key).field(key, metrics[key])
-        write_api.write(bucket=influxdb_bucket, record=p)
+        for key in metrics:
+            p = Point(key).field(key, metrics[key])
+            write_api.write(bucket=self.bucket, record=p)
 
 
 if __name__ == '__main__':
-    write_to_influxdb()
+    try:
+        InfluxDB().write_to_influxdb()
+    except Exception as e:
+        print(f'ERROR: {e}')
