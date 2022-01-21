@@ -19,7 +19,7 @@ updates:
       
   # Enable version updates for Docker
   # Maintain dependencies for npm
-  - package-ecosystem: "npm"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
