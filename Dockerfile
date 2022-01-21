@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:1.13
 
 RUN apk update && \
     apk add --no-cache bash py3-pip python3
