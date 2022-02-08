@@ -18,7 +18,7 @@ fi
 
 if [[ $OPTION = "start" ]]; then
   echo "Collecting metrics on the following CRON schedule: $CRON_SCHEDULE"
-  echo "$CRON_SCHEDULE bash /tmp/run.sh run" | crontab - && crond -f
+  echo "$CRON_SCHEDULE bash /run.sh run" | crontab - && crond -f
   
 elif [[ $OPTION = "run" ]]; then
   if [ -f $LOCKFILE ]; then
@@ -28,7 +28,7 @@ elif [[ $OPTION = "run" ]]; then
     touch $LOCKFILE
   fi
 
-  python3 /tmp/export.py 2>&1 | tee -a $LOG
+  python3 /export.py 2>&1 | tee -a $LOG
 
   rm -f $LOCKFILE
 
