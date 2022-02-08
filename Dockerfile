@@ -7,6 +7,8 @@ ADD run.sh /
 ADD requirements.txt /
 ADD export.py /
 
+RUN ["chmod", "+x", "/run.sh"]
+
 RUN pip3 install -r requirements.txt && \
     rm -rf /tmp/pip_build_root/
 
