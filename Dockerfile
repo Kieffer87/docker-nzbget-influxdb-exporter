@@ -3,11 +3,9 @@ FROM alpine:3.15.0
 RUN apk update && \
     apk add --no-cache bash py3-pip python3
 
-WORKDIR /tmp/
-
-ADD run.sh .
-ADD requirements.txt .
-ADD export.py .
+ADD run.sh /
+ADD requirements.txt /
+ADD export.py /
 
 RUN pip3 install -r requirements.txt && \
     rm -rf /tmp/pip_build_root/
@@ -30,5 +28,5 @@ ENV INFLUXDB_URL_SSL $INFLUXDB_URL_SSL
 ENV INFLUXDB_PORT $INFLUXDB_PORT
 ENV INFLUXDB_BUCKET $INFLUXDB_BUCKET
 
-ENTRYPOINT ["/tmp/run.sh"]
+ENTRYPOINT ["/run.sh"]
 CMD ["start"]
