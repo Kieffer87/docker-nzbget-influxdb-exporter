@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable = C0330, C0326, R0801, missing-docstring, missing-function-docstring, too-few-public-methods, logging-fstring-interpolation, too-many-instance-attributes
+disable = C0330, C0326, R0801, missing-docstring, missing-function-docstring, too-few-public-methods, logging-fstring-interpolation, too-many-instance-attributes, broad-except
