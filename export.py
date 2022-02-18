@@ -3,8 +3,8 @@ import requests
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-
 class NZBGet:
+    '''Class for NZBGet.'''
     def __init__(self) -> None:
         self.username = os.getenv('NZBGET_USERNAME')
         self.password = os.getenv('NZBGET_PASSWORD')
@@ -14,16 +14,19 @@ class NZBGet:
         self.values_to_return = os.getenv('NZBGET_VALUES_TO_RETURN').split(',')
 
     def get_nzb_status_metrics(self, api_endpoint):
+        ''' Retrieves metrics from NZBGet.'''
+        
         nzbget_endpoint = f'{self.url_ssl}://{self.username}:{self.password}@{self.url}:' \
                           f'{self.port}/jsonrpc/{api_endpoint}'
-        r = requests.get(nzbget_endpoint)
-        result = r.json().get('result')
+        response = requests.get(nzbget_endpoint)
+        result = response.json().get('result')
         for key in [key for key in result if key not in self.values_to_return]:
             del result[key]
         return result
 
 
 class InfluxDB:
+    '''Class for InfluxDB.'''
     def __init__(self) -> None:
         self.token = os.getenv('INFLUXDB_TOKEN')
         self.org = os.getenv('INFLUXDB_ORG')
@@ -33,6 +36,7 @@ class InfluxDB:
         self.bucket = os.getenv('INFLUXDB_BUCKET')
 
     def get_influxdb_client(self):
+        '''Gets an API client for InfluxDB.'''
         return InfluxDBClient(
             url=f'{self.url_ssl}://{self.url}:{self.port}',
             token=self.token,
@@ -40,6 +44,8 @@ class InfluxDB:
         )
 
     def write_to_influxdb(self):
+        '''Writes metrics to InfluxDB.'''
+        
         client = self.get_influxdb_client()
         endpoint = 'status'
         write_api = client.write_api(write_options=SYNCHRONOUS, precision="s")
@@ -47,12 +53,12 @@ class InfluxDB:
         metrics = NZBGet().get_nzb_status_metrics(endpoint)
 
         for key in metrics:
-            p = Point(key).field(key, metrics[key])
-            write_api.write(bucket=self.bucket, record=p)
+            key_point = Point(key).field(key, metrics[key])
+            write_api.write(bucket=self.bucket, record=key_point)
 
 
 if __name__ == '__main__':
     try:
         InfluxDB().write_to_influxdb()
-    except Exception as e:
-        print(f'ERROR: {e}')
+    except Exception as error:
+        print(f'ERROR: {error}')
