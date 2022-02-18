@@ -1,3 +1,5 @@
+'''Retrieve NZBGet metrics via API and send to InfluxDB'''
+
 import os
 import requests
 from influxdb_client import InfluxDBClient, Point
@@ -15,7 +17,7 @@ class NZBGet:
 
     def get_nzb_status_metrics(self, api_endpoint):
         ''' Retrieves metrics from NZBGet.'''
-        
+
         nzbget_endpoint = f'{self.url_ssl}://{self.username}:{self.password}@{self.url}:' \
                           f'{self.port}/jsonrpc/{api_endpoint}'
         response = requests.get(nzbget_endpoint)
@@ -45,7 +47,7 @@ class InfluxDB:
 
     def write_to_influxdb(self):
         '''Writes metrics to InfluxDB.'''
-        
+
         client = self.get_influxdb_client()
         endpoint = 'status'
         write_api = client.write_api(write_options=SYNCHRONOUS, precision="s")
