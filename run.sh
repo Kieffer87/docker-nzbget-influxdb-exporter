@@ -10,7 +10,7 @@ CRON_SCHEDULE=${CRON_SCHEDULE:-* * * * *}
 LOCKFILE="/tmp/influxdb-export.lock"
 LOG="/var/log/influxdb-export.log"
 
-trap "rm -f $LOCKFILE" EXIT
+trap 'rm -f $LOCKFILE' EXIT
 
 if [ ! -e $LOG ]; then
   touch $LOG
