@@ -14,13 +14,17 @@
 name: Codacy Security Scan
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ main ]
+    paths:
+      - 'export.py'
+      - 'requirements.txt'
+      - 'run.sh'
+      - 'Dockerfile'
   schedule:
     - cron: '18 2 * * 1'
+
 
 jobs:
   codacy-security-scan:
