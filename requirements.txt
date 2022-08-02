@@ -1,2 +1,2 @@
-influxdb_client==1.30.0
+influxdb_client==1.31.0
 pylint
